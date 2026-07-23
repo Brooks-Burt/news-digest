@@ -1,7 +1,7 @@
 # Patriots Training Camp Digest
 
 Pulls Patriots news from RSS feeds daily, summarizes/groups it with the
-Claude API, and publishes it as a simple webpage via GitHub Pages.
+openAI API, and publishes it as a simple webpage via GitHub Pages.
 
 ## One-time setup
 
