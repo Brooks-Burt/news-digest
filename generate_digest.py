@@ -7,6 +7,7 @@ To repoint this at a different topic, edit the CONFIG block below —
 nothing else needs to change.
 """
 
+import trafilatura
 import os
 import sys
 import json
@@ -27,12 +28,13 @@ PAGE_TITLE = "News Digest"
 
 # RSS feed URLs — swap these out for any topic
 FEEDS = [
-    "https://patriotswire.usatoday.com/feed/",
     "https://musketfire.com/feed/",
-    "https://profootballtalk.nbcsports.com/category/teams/afc/new-england-patriots/feed/",
     "https://www.patspulpit.com/rss/index.xml",
-    "https://www.boston.com/sports/new-england-patriots/2026/",
-    "https://www.si.com/nfl/patriots/",
+    "https://www.boston.com/tag/new-england-patriots/feed/",
+    "https://www.nytimes.com/athletic/rss/nfl/patriots/",
+    "https://www.thecoldwire.com/sports/nfl/new-england-patriots/feed/",
+    "https://www.patspropaganda.com/feed/",
+  #  "https://feeds.bleacherreport.com/articles"
 ]
 
 # How the model should group stories. Adjust per topic.
@@ -47,12 +49,37 @@ CATEGORIES = [
 
 # Only include stories published within this many hours (catches "daily" news,
 # not stale evergreen posts some feeds include)
-LOOKBACK_HOURS = 36
+LOOKBACK_HOURS = 168
 
 MODEL = "gpt-4o-mini"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "docs", "index.html")
 
+# ----------------------------------------------------------------------
+# 1.5. GET ARTICLE TEXT (PENDING OPTION)
+# ----------------------------------------------------------------------
+
+def extract_article(url):
+    try:
+        downloaded = trafilatura.fetch_url(url)
+      #  print(f"Downloaded {url}: {len(downloaded) if downloaded else 0} bytes")
+        if not downloaded:
+            print(f"WARN: failed to download {url}", file=sys.stderr)
+            return ""
+
+        article = trafilatura.extract(
+            downloaded,
+            include_comments=False,
+            include_tables=False,
+            include_images=False,
+        )
+        if not article:
+            print(f"WARN: failed to extract article from {url}", file=sys.stderr)
+        return article or ""
+
+    except Exception as e:
+        print(f"ERROR: failed to extract article from {url}: {e}", file=sys.stderr)
+        return ""
 
 # ----------------------------------------------------------------------
 # 2. FETCH
@@ -64,28 +91,43 @@ def fetch_recent_entries():
     for url in FEEDS:
         try:
             feed = feedparser.parse(url)
+            print(f"DEBUG: {url}", file=sys.stderr)
+            print(f"DEBUG:   bozo={feed.bozo}, status={feed.get('status', 'n/a')}", file=sys.stderr)
+            if feed.bozo:
+                print(f"DEBUG:   bozo_exception={feed.bozo_exception}", file=sys.stderr)
+            print(f"DEBUG:   title={feed.feed.get('title', 'NO TITLE')}, entries={len(feed.entries)}", file=sys.stderr)
         except Exception as e:
             print(f"WARN: failed to parse {url}: {e}", file=sys.stderr)
             continue
 
         source_name = feed.feed.get("title", url)
 
-        for entry in feed.entries:
+        for i, entry in enumerate(feed.entries):
             published = entry.get("published_parsed") or entry.get("updated_parsed")
             if published:
                 pub_dt = datetime(*published[:6], tzinfo=timezone.utc)
+                print(f"DEBUG:   entry {i}: published {pub_dt.isoformat()}, cutoff {cutoff.isoformat()}", file=sys.stderr)
                 if pub_dt < cutoff:
+                    print(f"DEBUG:     -> FILTERED OUT (too old)", file=sys.stderr)
                     continue
             else:
+                print(f"DEBUG:   entry {i}: NO PUBLISH DATE", file=sys.stderr)
                 pub_dt = None
+
+            print(f"DEBUG:     -> KEEPING", file=sys.stderr)
+            article_text = extract_article(entry.get("link", ""))
 
             entries.append({
                 "source": source_name,
                 "title": entry.get("title", "").strip(),
                 "link": entry.get("link", ""),
                 "summary": (entry.get("summary", "") or "")[:400],
+                "article": article_text[:6000] if article_text else "",
                 "published": pub_dt.isoformat() if pub_dt else None,
             })
+
+    with_article = sum(1 for e in entries if e.get("article"))
+    print(f"DEBUG: {with_article}/{len(entries)} entries have extracted article text", file=sys.stderr)
 
     return entries
 
@@ -102,13 +144,26 @@ def build_digest(entries):
         sys.exit(1)
 
     entries_text = "\n\n".join(
-        f"[{i}] SOURCE: {e['source']}\nTITLE: {e['title']}\nLINK: {e['link']}\nSNIPPET: {e['summary']}"
-        for i, e in enumerate(entries)
-    )
+    f"""[{i}]
+SOURCE: {e['source']}
+TITLE: {e['title']}
+LINK: {e['link']}
+
+SNIPPET:
+{e['summary']}
+
+ARTICLE:
+{e['article'] if e.get('article') else '[ARTICLE NOT AVAILABLE]'}
+"""
+    for i, e in enumerate(entries)
+)
 
     system_prompt = (
         f"You are organizing news about {DIGEST_TOPIC} into a daily digest. "
-        "You will be given a numbered list of raw headlines/snippets pulled from RSS feeds. "
+        "You will receive both an RSS snippet and, when available, the extracted article text. "
+        "Always prefer information from the ARTICLE section because it contains more complete details. "
+        "If ARTICLE is unavailable or marked '[ARTICLE NOT AVAILABLE]', summarize using only the RSS snippet. "
+        "Never invent facts that are not present in either source. "
         f"Group them into these categories: {', '.join(CATEGORIES)}. "
         "Merge near-duplicate stories covering the same event (keep only one, but you may note "
         "if multiple outlets covered it). Skip anything not actually relevant to the topic. "
@@ -116,9 +171,13 @@ def build_digest(entries):
         "wording from the snippet) and keep the original link and source name. "
         "Ensure capture of main point/player article may be hinting at (ie if title is "
         "this linebacker could prove to be a problem, please include players name)."
+        "For each item, also include a field \"source_detail\" set to exactly \"full_article\" "
+        "if you used the ARTICLE section, or \"rss_summary\" if ARTICLE was unavailable and you "
+        "used only the snippet. "
         "Respond ONLY with valid JSON, no markdown fences, matching this schema:\n"
         '{"groups": [{"category": "string", "items": [{"headline": "string", '
-        '"summary": "string", "source": "string", "link": "string"}]}]}'
+        '"summary": "string", "source": "string", "link": "string", '
+        '"source_detail": "full_article | rss_summary"}]}]}'
     )
 
     response = requests.post(
@@ -167,6 +226,7 @@ def render_html(digest):
                     <a class="headline" href="{html.escape(item.get("link",""))}" target="_blank" rel="noopener">{html.escape(item.get("headline",""))}</a>
                     <p class="summary">{html.escape(item.get("summary",""))}</p>
                     <span class="source">{html.escape(item.get("source",""))}</span>
+                    <span class="badge {'badge-full' if item.get('source_detail') == 'full_article' else 'badge-rss'}">{'Full article' if item.get('source_detail') == 'full_article' else 'RSS summary only'}</span>
                 </li>'''
                 for item in group.get("items", [])
             )
@@ -198,6 +258,10 @@ def render_html(digest):
   .headline:hover {{ text-decoration: underline; }}
   .summary {{ margin: 6px 0 4px; color: #333; font-size: 0.95rem; }}
   .source {{ font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.03em; }}
+  .badge {{ display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 10px;
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.02em; }}
+  .badge-full {{ background: #e3f3e6; color: #1a7431; }}
+  .badge-rss {{ background: #f1f1f1; color: #888; }}
   .empty {{ color: #666; }}
 </style>
 </head>
