@@ -62,7 +62,7 @@ def extract_article(url):
         downloaded = trafilatura.fetch_url(url)
       #  print(f"Downloaded {url}: {len(downloaded) if downloaded else 0} bytes")
         if not downloaded:
-          #  print(f"WARN: failed to download {url}")
+            print(f"WARN: failed to download {url}", file=sys.stderr)
             return ""
 
         article = trafilatura.extract(
@@ -71,10 +71,12 @@ def extract_article(url):
             include_tables=False,
             include_images=False,
         )
-
+        if not article:
+            print(f"WARN: failed to extract article from {url}", file=sys.stderr)
         return article or ""
 
-    except Exception:
+    except Exception as e:
+        print(f"ERROR: failed to extract article from {url}: {e}", file=sys.stderr)
         return ""
 
 # ----------------------------------------------------------------------
