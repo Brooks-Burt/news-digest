@@ -1,8 +1,10 @@
-#!/usr/bin/env python3
 """
-Patriots Training Camp Daily Digest
-Pulls recent headlines from RSS feeds, summarizes/groups them with the
-Claude API, and writes the result to docs/index.html for GitHub Pages.
+News Digest
+Pulls headlines from RSS feeds, summarizes/groups them with an LLM API,
+and writes the result to docs/index.html for GitHub Pages / static hosting.
+
+To repoint this at a different topic, edit the CONFIG block below —
+nothing else needs to change.
 """
 
 import os
@@ -15,13 +17,30 @@ import feedparser
 import requests
 
 # ----------------------------------------------------------------------
-# 1. CONFIG — add/remove feeds here freely
+# CONFIG — everything topic-specific lives here
 # ----------------------------------------------------------------------
+
+# What this digest is about, used in the page title and the prompt sent
+# to the model so it knows what's relevant vs. noise.
+DIGEST_TOPIC = "New England Patriots training camp"
+PAGE_TITLE = "News Digest"
+
+# RSS feed URLs — swap these out for any topic
 FEEDS = [
     "https://patriotswire.usatoday.com/feed/",
     "https://musketfire.com/feed/",
     "https://profootballtalk.nbcsports.com/category/teams/afc/new-england-patriots/feed/",
     "https://www.patspulpit.com/rss/index.xml",
+]
+
+# How the model should group stories. Adjust per topic.
+CATEGORIES = [
+    "Roster & Depth Chart",
+    "Injuries",
+    "Contracts & Business",
+    "Standout Performers",
+    "Coaching & Scheme",
+    "Other News",
 ]
 
 # Only include stories published within this many hours (catches "daily" news,
@@ -86,12 +105,11 @@ def build_digest(entries):
     )
 
     system_prompt = (
-        "You are organizing New England Patriots training camp news into a daily digest. "
+        f"You are organizing news about {DIGEST_TOPIC} into a daily digest. "
         "You will be given a numbered list of raw headlines/snippets pulled from RSS feeds. "
-        "Group them into thematic categories such as: Roster & Depth Chart, Injuries, "
-        "Contracts & Business, Standout Performers, Coaching & Scheme, Other News. "
+        f"Group them into these categories: {', '.join(CATEGORIES)}. "
         "Merge near-duplicate stories covering the same event (keep only one, but you may note "
-        "if multiple outlets covered it). Skip anything not actually about the Patriots or camp. "
+        "if multiple outlets covered it). Skip anything not actually relevant to the topic. "
         "For each item, write a neutral 1-2 sentence summary IN YOUR OWN WORDS (never copy "
         "wording from the snippet) and keep the original link and source name. "
         "Respond ONLY with valid JSON, no markdown fences, matching this schema:\n"
