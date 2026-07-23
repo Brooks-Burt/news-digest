@@ -3,96 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Patriots Training Camp Digest</title>
+<title>Pats Training Camp Digest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; max-width: 720px;
-          margin: 40px auto; padding: 0 20px; background: #f7f7f8; color: #1a1a1a; }
-  h1 { font-size: 1.6rem; margin-bottom: 4px; }
-  .updated { color: #666; font-size: 0.85rem; margin-bottom: 32px; }
-  .group { margin-bottom: 32px; }
-  .group h2 { font-size: 1.1rem; border-bottom: 2px solid #002244; padding-bottom: 6px;
-               color: #002244; }
-  ul { list-style: none; padding: 0; }
-  .item { background: white; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px;
-           box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
-  .headline { font-weight: 600; color: #002244; text-decoration: none; }
-  .headline:hover { text-decoration: underline; }
-  .summary { margin: 6px 0 4px; color: #333; font-size: 0.95rem; }
-  .source { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.03em; }
-  .badge { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 10px;
-            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.02em; }
-  .badge-full { background: #e3f3e6; color: #1a7431; }
-  .badge-rss { background: #f1f1f1; color: #888; }
-  .empty { color: #666; }
+  :root {
+    --navy: #0a2240;
+    --navy-dark: #061530;
+    --red: #b0313f;
+    --silver: #c4c9cd;
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --text: #1c2530;
+    --text-muted: #66707c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, Segoe UI, Roboto, sans-serif;
+    max-width: 760px;
+    margin: 0 auto 60px;
+    padding: 0 20px;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    margin: 0 -20px 32px;
+    padding: 36px 20px 22px;
+    border-bottom: 4px solid var(--red);
+  }
+  h1 {
+    font-family: 'Oswald', 'Inter', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+  .updated {
+    color: var(--silver);
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+  .group { margin-bottom: 30px; }
+  .group h2 {
+    font-family: 'Oswald', 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+    border-left: 4px solid var(--red);
+    padding: 2px 0 2px 10px;
+    margin: 0 0 14px;
+  }
+  ul { list-style: none; padding: 0; margin: 0; }
+  .item {
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid #e8e9ec;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  .item:hover {
+    box-shadow: 0 4px 14px rgba(10, 34, 64, 0.08);
+    transform: translateY(-1px);
+  }
+  .headline {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--navy);
+    text-decoration: none;
+  }
+  .headline:hover { color: var(--red); text-decoration: underline; }
+  .summary {
+    margin: 8px 0 10px;
+    color: var(--text);
+    font-size: 0.93rem;
+  }
+  .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .source {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .badge-full { background: #e3f0e6; color: #2f7a3d; }
+  .badge-rss { background: #eceded; color: var(--text-muted); }
+  .empty { color: var(--text-muted); padding: 20px 0; }
 </style>
 </head>
 <body>
-  <h1>Patriots Training Camp Digest</h1>
-  <div class="updated">Last updated: July 23, 2026 19:19 UTC</div>
+  <header>
+    <h1>Pats Training Camp Digest</h1>
+    <div class="updated">Last updated: July 23, 2026 19:30 UTC</div>
+  </header>
   
                 <section class="group">
                     <h2>Roster &amp; Depth Chart</h2>
                     <ul><li class="item">
-                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/07/22/patriots-harold-landry-injury-physically-unable-to-perform-list-comments/" target="_blank" rel="noopener">Struggles Ahead for Patriots&#x27; Edge Rushers</a>
-                    <p class="summary">New England Patriots edge rusher Harold Landry has been placed on the physically unable to perform list (PUP) as he continues to recover from a knee injury, missing spring practices. This situation raises concerns for the Patriots&#x27; depth at the position, especially with second-round rookie Gabe Jacas absent due to contract and injury issues. With K&#x27;Lavon Chaisson having left in free agency, Landry&#x27;s leadership is crucial for their revamped edge group, relying on younger players like Elijah Ponder and Bradyn Swinson to provide support during training camp.</p>
-                    <span class="source">Pats Pulpit</span>
-                    <span class="badge badge-full">Full article</span>
+                    <a class="headline" href="https://musketfire.com/one-patriots-rookie-already-looks-like-a-long-shot-to-make-the-roster?utm_source=RSS" target="_blank" rel="noopener">Patriots rookie Quintayvious Hutchins faces tough roster challenge</a>
+                    <p class="summary">Quintayvious Hutchins, a seventh-round pick, has the most difficult path to secure a spot on the New England Patriots&#x27; roster for the 2026 season, following a crowded edge rusher position and competition from established players like Harold Landry and Dre&#x27;Mont Jones. Hutchins struggled in college, raising questions about his viability as an NFL player, compounded by an assault and battery charge. This makes his chances of making the final 53-man roster quite slim, prompting speculation about his future with the team.</p>
+                    <div class="meta">
+                        <span class="source">Musket Fire Feed</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
                 </li></ul>
                 </section>
 
                 <section class="group">
                     <h2>Injuries</h2>
                     <ul><li class="item">
-                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/07/22/patriots-gabe-jacas-injury-update-redshirt-season-college/" target="_blank" rel="noopener">Gabe Jacas May Face Redshirt Rookie Season</a>
-                    <p class="summary">New England Patriots second-round pick Gabe Jacas has missed all spring practices and is currently unsigned, raising concerns that he might not contribute this season. Insider Albert Breer suggests that Jacas could be headed for a &#x27;redshirt&#x27; year due to these setbacks, including a knee procedure and earlier injuries. This absence is particularly concerning for the Patriots, as they cope with a lack of depth on the edge following losses to their defensive line corps this offseason.</p>
-                    <span class="source">Boston.com</span>
-                    <span class="badge badge-full">Full article</span>
+                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/07/22/patriots-harold-landry-injury-physically-unable-to-perform-list-comments/" target="_blank" rel="noopener">Patriots edge rusher Harold Landry placed on PUP list</a>
+                    <p class="summary">Harold Landry has been placed on the physically unable to perform (PUP) list, missing spring workouts as he continues rehabilitation from a knee injury sustained in the previous season. His absence raises concerns over the team&#x27;s edge depth, as rookie Gabe Jacas remains unsigned, leaving New England vulnerable in this position when training camp begins.</p>
+                    <div class="meta">
+                        <span class="source">New England Patriots: News, commentary, scores, and stats</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
                 </li>
 <li class="item">
-                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/07/22/patriots-harold-landry-injury-physically-unable-to-perform-list-comments/" target="_blank" rel="noopener">Tight End C.J. Dippre on PUP List After Injury</a>
-                    <p class="summary">New England Patriots tight end C.J. Dippre has been placed on the physically unable to perform (PUP) list due to an unspecified injury. His absence from training camp creates further uncertainty at the position, where Hunter Henry remains the only proven contributor following the offseason departure of Julian Hill to injury. The Patriots will need to evaluate other options at tight end, including rookie Eli Raridon and Jack Westover, as they prepare for the upcoming season.</p>
-                    <span class="source">Boston.com</span>
-                    <span class="badge badge-full">Full article</span>
+                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/07/22/patriots-gabe-jacas-injury-update-redshirt-season-college/" target="_blank" rel="noopener">Gabe Jacas may miss the season with ongoing contract issues</a>
+                    <p class="summary">Second-round pick Gabe Jacas has yet to sign his contract and has been absent from offseason practices, leading insiders to speculate that he could be facing a redshirt season. This is particularly concerning as the Patriots need depth at edge rusher with Harold Landry currently on the PUP list, adding pressure to the remaining rookies and veterans to step up during training camp.</p>
+                    <div class="meta">
+                        <span class="source">Musket Fire Feed</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
                 </li></ul>
                 </section>
 
                 <section class="group">
                     <h2>Contracts &amp; Business</h2>
                     <ul><li class="item">
-                    <a class="headline" href="https://www.nytimes.com/athletic/7463590/2026/07/23/patriots-training-camp-questions-christian-gonzalez/" target="_blank" rel="noopener">Christian Gonzalez’s Contract Negotiations Create Concern</a>
-                    <p class="summary">New England Patriots cornerback Christian Gonzalez is yet to secure an extension despite being eligible for months, which has led to concerns about the potential disruption this could cause during training camp. Gonzalez&#x27;s absence from many spring practices and limited participation has prompted speculation about how the contract situation may affect his play this season. Gonzalez is regarded highly and has the potential to reset the market for cornerbacks if a deal is reached soon.</p>
-                    <span class="source">The Athletic</span>
-                    <span class="badge badge-full">Full article</span>
+                    <a class="headline" href="https://musketfire.com/latest-report-will-make-christian-gonzalez-smile-while-costing-patriots-extra-01ky5c0f2zvy?utm_source=RSS" target="_blank" rel="noopener">Christian Gonzalez&#x27;s extension likely tied to Devon Witherspoon&#x27;s deal</a>
+                    <p class="summary">New England cornerback Christian Gonzalez continues to seek a contract extension. However, negotiations may be stalled as the Patriots await the outcome of Devon Witherspoon&#x27;s expected extension, which might set the market for Gonzalez. Both players aim to become the highest-paid at their position, and the delay in signing could negatively impact Gonzalez&#x27;s training camp participation.</p>
+                    <div class="meta">
+                        <span class="source">Musket Fire Feed</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
+                </li>
+<li class="item">
+                    <a class="headline" href="https://musketfire.com/robert-kraft-is-sitting-on-one-move-patriots-players-hope-the-entire-nfl-will-copy-01kxy949528b?utm_source=RSS" target="_blank" rel="noopener">Robert Kraft needs to act on player demands for natural grass fields</a>
+                    <p class="summary">Patriots owner Robert Kraft has the opportunity to lead the NFL towards natural grass playing surfaces, following player frustrations with synthetic turf, especially after successful World Cup installations. This movement, supported by a recent NFLPA poll showing overwhelming preference for grass, highlights a significant player safety concern and offers Kraft a chance to regain favor with current players by addressing these issues.</p>
+                    <div class="meta">
+                        <span class="source">Musket Fire Feed</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
                 </li></ul>
                 </section>
 
                 <section class="group">
                     <h2>Standout Performers</h2>
                     <ul><li class="item">
-                    <a class="headline" href="https://www.nytimes.com/athletic/7459464/2026/07/21/nfl-players-all-32-teams-most-on-the-line-2026/" target="_blank" rel="noopener">Drake Maye Receives High Praise as Franchise QB</a>
-                    <p class="summary">In a recent assessment, ESPN highlighted Patriots quarterback Drake Maye as the top young quarterback to build a franchise around, following his impressive second season where he nearly won the MVP award. Maye&#x27;s performance, complemented by the addition of wide receivers A.J. Brown and Romeo Doubs, positions him for another breakout year in 2026 as the Patriots look to replicate their success from last season&#x27;s Super Bowl run.</p>
-                    <span class="source">The Athletic</span>
-                    <span class="badge badge-full">Full article</span>
+                    <a class="headline" href="https://www.boston.com/uncategorized/new-england-patriots/2026/07/22/patriots-top-espn-25-and-under-rankings/" target="_blank" rel="noopener">Drake Maye earns praise as top franchise player for Patriots</a>
+                    <p class="summary">Quarterback Drake Maye, coming off an impressive second season where he narrowly missed winning the MVP, has been recognized as the most valuable young commodity in the NFL. This highlights his crucial role heading into the 2026 season, particularly with a revamped receiving corps, positioning him for further success as he leads the team in a challenging schedule ahead.</p>
+                    <div class="meta">
+                        <span class="source">New England Patriots: News, commentary, scores, and stats</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
                 </li></ul>
                 </section>
 
                 <section class="group">
                     <h2>Coaching &amp; Scheme</h2>
                     <ul><li class="item">
-                    <a class="headline" href="https://www.patspulpit.com/new-england-patriots-training-camp/131434/offensive-line-deep-dive-center-training-camp" target="_blank" rel="noopener">Mike Vrabel Reiterates Confidence in Offensive Line Adjustments</a>
-                    <p class="summary">With the New England Patriots&#x27; training camp approaching, head coach Mike Vrabel emphasized the team&#x27;s improvements to the offensive line, particularly with the acquisition of former Jets guard Alijah Vera-Tucker, who is expected to stabilize play alongside second-year center Jared Wilson. Following a dismal postseason performance, these adjustments are crucial for quarterback Drake Maye as he seeks to build on his stellar performance from last season.</p>
-                    <span class="source">Pats Pulpit</span>
-                    <span class="badge badge-full">Full article</span>
+                    <a class="headline" href="https://musketfire.com/robert-kraft-just-made-his-stance-on-mike-vrabel-s-patriots-future-crystal-clear-01kxrzcp7pwe?utm_source=RSS" target="_blank" rel="noopener">Mike Vrabel secures support amidst offseason drama</a>
+                    <p class="summary">Patriots owner Robert Kraft has publicly reiterated his confidence in head coach Mike Vrabel amid recent rumors concerning Vrabel&#x27;s personal life. Kraft emphasized Vrabel&#x27;s relationship with players and his football knowledge as key reasons for his continued support, signaling stability as the Patriots move into training camp aiming for another Super Bowl run.</p>
+                    <div class="meta">
+                        <span class="source">Musket Fire Feed</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
                 </li></ul>
                 </section>
 
                 <section class="group">
                     <h2>Other News</h2>
                     <ul><li class="item">
-                    <a class="headline" href="https://www.patspulpit.com/new-england-patriots-training-camp/131441/2026-practice-schedule-position-battles-practical-info-more" target="_blank" rel="noopener">Patriots Training Camp Overview Ahead of 2026 Season</a>
-                    <p class="summary">The New England Patriots will commence their 2026 training camp on July 25, featuring public practices at Gillette Stadium. Key storylines to watch include revamped position battles across tight end, running back depth, and the wide receiver room, which has seen significant changes with the additions of A.J. Brown and Romeo Doubs. Additional highlights include a focus on the team&#x27;s edge rushers and the possible emergence of stars like Caleb Lomu and Karon Prunty as camp progresses.</p>
-                    <span class="source">Pats Pulpit</span>
-                    <span class="badge badge-full">Full article</span>
+                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/07/22/2026-patriots-training-camp-guide-dates/" target="_blank" rel="noopener">Patriots training camp to start on July 25 with public sessions</a>
+                    <p class="summary">The New England Patriots will kick off their training camp on July 25 at Gillette Stadium, with 13 public practice sessions scheduled throughout the summer. This marks an important preparation phase for the team as they build on their successful 2025 season and prepare for the upcoming challenges, including a tough early-season schedule.</p>
+                    <div class="meta">
+                        <span class="source">Pats Pulpit</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
                 </li></ul>
                 </section>
 </body>
