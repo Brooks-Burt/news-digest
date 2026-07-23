@@ -49,7 +49,7 @@ CATEGORIES = [
 
 # Only include stories published within this many hours (catches "daily" news,
 # not stale evergreen posts some feeds include)
-LOOKBACK_HOURS = 168
+LOOKBACK_HOURS = 48
 
 MODEL = "gpt-4o-mini"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
