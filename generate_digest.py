@@ -32,8 +32,7 @@ FEEDS = [
     "https://musketfire.com/feed/",
     "https://profootballtalk.nbcsports.com/category/teams/afc/new-england-patriots/feed/",
     "https://www.patspulpit.com/rss/index.xml",
-    "[https://www.boston.com/tag/new-england-patriots/feed/](https://www.boston.com/tag/new-england-patriots/feed/)",
-    "https://www.si.com/nfl/patriots/",
+    "https://www.boston.com/tag/new-england-patriots/feed/",
 ]
 
 # How the model should group stories. Adjust per topic.
