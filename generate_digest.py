@@ -34,7 +34,7 @@ FEEDS = [
     "https://www.nytimes.com/athletic/rss/nfl/patriots/",
     "https://www.thecoldwire.com/sports/nfl/new-england-patriots/feed/",
     "https://www.patspropaganda.com/feed/",
-   # "https://feeds.bleacherreport.com/articles",
+  #  "https://feeds.bleacherreport.com/articles"
 ]
 
 # How the model should group stories. Adjust per topic.
@@ -125,7 +125,10 @@ def fetch_recent_entries():
                 "article": article_text[:6000] if article_text else "",
                 "published": pub_dt.isoformat() if pub_dt else None,
             })
-   
+
+    with_article = sum(1 for e in entries if e.get("article"))
+    print(f"DEBUG: {with_article}/{len(entries)} entries have extracted article text", file=sys.stderr)
+
     return entries
 
 
@@ -168,9 +171,13 @@ ARTICLE:
         "wording from the snippet) and keep the original link and source name. "
         "Ensure capture of main point/player article may be hinting at (ie if title is "
         "this linebacker could prove to be a problem, please include players name)."
+        "For each item, also include a field \"source_detail\" set to exactly \"full_article\" "
+        "if you used the ARTICLE section, or \"rss_summary\" if ARTICLE was unavailable and you "
+        "used only the snippet. "
         "Respond ONLY with valid JSON, no markdown fences, matching this schema:\n"
         '{"groups": [{"category": "string", "items": [{"headline": "string", '
-        '"summary": "string", "source": "string", "link": "string"}]}]}'
+        '"summary": "string", "source": "string", "link": "string", '
+        '"source_detail": "full_article | rss_summary"}]}]}'
     )
 
     response = requests.post(
@@ -219,6 +226,7 @@ def render_html(digest):
                     <a class="headline" href="{html.escape(item.get("link",""))}" target="_blank" rel="noopener">{html.escape(item.get("headline",""))}</a>
                     <p class="summary">{html.escape(item.get("summary",""))}</p>
                     <span class="source">{html.escape(item.get("source",""))}</span>
+                    <span class="badge {'badge-full' if item.get('source_detail') == 'full_article' else 'badge-rss'}">{'Full article' if item.get('source_detail') == 'full_article' else 'RSS summary only'}</span>
                 </li>'''
                 for item in group.get("items", [])
             )
@@ -250,6 +258,10 @@ def render_html(digest):
   .headline:hover {{ text-decoration: underline; }}
   .summary {{ margin: 6px 0 4px; color: #333; font-size: 0.95rem; }}
   .source {{ font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.03em; }}
+  .badge {{ display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 10px;
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.02em; }}
+  .badge-full {{ background: #e3f3e6; color: #1a7431; }}
+  .badge-rss {{ background: #f1f1f1; color: #888; }}
   .empty {{ color: #666; }}
 </style>
 </head>
