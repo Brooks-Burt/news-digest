@@ -7,6 +7,7 @@ To repoint this at a different topic, edit the CONFIG block below —
 nothing else needs to change.
 """
 
+import trafilatura
 import os
 import sys
 import json
@@ -31,7 +32,7 @@ FEEDS = [
     "https://musketfire.com/feed/",
     "https://profootballtalk.nbcsports.com/category/teams/afc/new-england-patriots/feed/",
     "https://www.patspulpit.com/rss/index.xml",
-    "https://www.boston.com/sports/new-england-patriots/2026/",
+    "[https://www.boston.com/tag/new-england-patriots/feed/](https://www.boston.com/tag/new-england-patriots/feed/)",
     "https://www.si.com/nfl/patriots/",
 ]
 
@@ -47,12 +48,35 @@ CATEGORIES = [
 
 # Only include stories published within this many hours (catches "daily" news,
 # not stale evergreen posts some feeds include)
-LOOKBACK_HOURS = 36
+LOOKBACK_HOURS = 168
 
 MODEL = "gpt-4o-mini"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "docs", "index.html")
 
+# ----------------------------------------------------------------------
+# 1.5. GET ARTICLE TEXT (PENDING OPTION)
+# ----------------------------------------------------------------------
+
+def extract_article(url):
+    try:
+        downloaded = trafilatura.fetch_url(url)
+      #  print(f"Downloaded {url}: {len(downloaded) if downloaded else 0} bytes")
+        if not downloaded:
+          #  print(f"WARN: failed to download {url}")
+            return ""
+
+        article = trafilatura.extract(
+            downloaded,
+            include_comments=False,
+            include_tables=False,
+            include_images=False,
+        )
+
+        return article or ""
+
+    except Exception:
+        return ""
 
 # ----------------------------------------------------------------------
 # 2. FETCH
@@ -79,14 +103,19 @@ def fetch_recent_entries():
             else:
                 pub_dt = None
 
+            article_text = extract_article(entry.get("link", ""))
+            article_text = article_text[:6000]
             entries.append({
                 "source": source_name,
                 "title": entry.get("title", "").strip(),
                 "link": entry.get("link", ""),
                 "summary": (entry.get("summary", "") or "")[:400],
+                "article": article_text,
                 "published": pub_dt.isoformat() if pub_dt else None,
             })
-
+            #test 
+            print(article_text[:400])
+   
     return entries
 
 
@@ -102,13 +131,26 @@ def build_digest(entries):
         sys.exit(1)
 
     entries_text = "\n\n".join(
-        f"[{i}] SOURCE: {e['source']}\nTITLE: {e['title']}\nLINK: {e['link']}\nSNIPPET: {e['summary']}"
-        for i, e in enumerate(entries)
-    )
+    f"""[{i}]
+SOURCE: {e['source']}
+TITLE: {e['title']}
+LINK: {e['link']}
+
+SNIPPET:
+{e['summary']}
+
+ARTICLE:
+{e['article'] if e.get('article') else '[ARTICLE NOT AVAILABLE]'}
+"""
+    for i, e in enumerate(entries)
+)
 
     system_prompt = (
         f"You are organizing news about {DIGEST_TOPIC} into a daily digest. "
-        "You will be given a numbered list of raw headlines/snippets pulled from RSS feeds. "
+        "You will receive both an RSS snippet and, when available, the extracted article text. "
+        "Always prefer information from the ARTICLE section because it contains more complete details. "
+        "If ARTICLE is unavailable or marked '[ARTICLE NOT AVAILABLE]', summarize using only the RSS snippet. "
+        "Never invent facts that are not present in either source. "
         f"Group them into these categories: {', '.join(CATEGORIES)}. "
         "Merge near-duplicate stories covering the same event (keep only one, but you may note "
         "if multiple outlets covered it). Skip anything not actually relevant to the topic. "
