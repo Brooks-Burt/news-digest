@@ -34,7 +34,7 @@ FEEDS = [
     "https://www.nytimes.com/athletic/rss/nfl/patriots/",
     "https://www.thecoldwire.com/sports/nfl/new-england-patriots/feed/",
     "https://www.patspropaganda.com/feed/",
-    "https://feeds.bleacherreport.com/articles"
+   # "https://feeds.bleacherreport.com/articles",
 ]
 
 # How the model should group stories. Adjust per topic.
@@ -116,7 +116,15 @@ def fetch_recent_entries():
 
             print(f"DEBUG:     -> KEEPING", file=sys.stderr)
             article_text = extract_article(entry.get("link", ""))
-            # ... rest of entry append
+
+            entries.append({
+                "source": source_name,
+                "title": entry.get("title", "").strip(),
+                "link": entry.get("link", ""),
+                "summary": (entry.get("summary", "") or "")[:400],
+                "article": article_text[:6000] if article_text else "",
+                "published": pub_dt.isoformat() if pub_dt else None,
+            })
    
     return entries
 
