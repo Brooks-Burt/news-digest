@@ -110,8 +110,10 @@ def build_digest(entries):
         f"Group them into these categories: {', '.join(CATEGORIES)}. "
         "Merge near-duplicate stories covering the same event (keep only one, but you may note "
         "if multiple outlets covered it). Skip anything not actually relevant to the topic. "
-        "For each item, write a neutral 1-2 sentence summary IN YOUR OWN WORDS (never copy "
+        "For each item, write a neutral 2-3 sentence summary IN YOUR OWN WORDS (never copy "
         "wording from the snippet) and keep the original link and source name. "
+        "Ensure capture of main point/player article may be hinting at (ie if title is "
+        "this linebacker could prove to be a problem, please include players name)."
         "Respond ONLY with valid JSON, no markdown fences, matching this schema:\n"
         '{"groups": [{"category": "string", "items": [{"headline": "string", '
         '"summary": "string", "source": "string", "link": "string"}]}]}'
