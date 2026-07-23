@@ -24,7 +24,7 @@ import requests
 # What this digest is about, used in the page title and the prompt sent
 # to the model so it knows what's relevant vs. noise.
 DIGEST_TOPIC = "New England Patriots training camp"
-PAGE_TITLE = "News Digest"
+PAGE_TITLE = "Pats Training Camp Digest"
 
 # RSS feed URLs — swap these out for any topic
 FEEDS = [
@@ -231,8 +231,10 @@ def render_html(digest):
                 f'''<li class="item">
                     <a class="headline" href="{html.escape(item.get("link",""))}" target="_blank" rel="noopener">{html.escape(item.get("headline",""))}</a>
                     <p class="summary">{html.escape(item.get("summary",""))}</p>
-                    <span class="source">{html.escape(item.get("source",""))}</span>
-                    <span class="badge {'badge-full' if item.get('source_detail') == 'full_article' else 'badge-rss'}">{'Full article' if item.get('source_detail') == 'full_article' else 'RSS summary only'}</span>
+                    <div class="meta">
+                        <span class="source">{html.escape(item.get("source",""))}</span>
+                        <span class="badge {'badge-full' if item.get('source_detail') == 'full_article' else 'badge-rss'}">{'Full article' if item.get('source_detail') == 'full_article' else 'RSS summary only'}</span>
+                    </div>
                 </li>'''
                 for item in group.get("items", [])
             )
@@ -248,32 +250,115 @@ def render_html(digest):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Patriots Training Camp Digest</title>
+<title>{html.escape(PAGE_TITLE)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
 <style>
-  body {{ font-family: -apple-system, Segoe UI, Roboto, sans-serif; max-width: 720px;
-          margin: 40px auto; padding: 0 20px; background: #f7f7f8; color: #1a1a1a; }}
-  h1 {{ font-size: 1.6rem; margin-bottom: 4px; }}
-  .updated {{ color: #666; font-size: 0.85rem; margin-bottom: 32px; }}
-  .group {{ margin-bottom: 32px; }}
-  .group h2 {{ font-size: 1.1rem; border-bottom: 2px solid #002244; padding-bottom: 6px;
-               color: #002244; }}
-  ul {{ list-style: none; padding: 0; }}
-  .item {{ background: white; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px;
-           box-shadow: 0 1px 2px rgba(0,0,0,0.06); }}
-  .headline {{ font-weight: 600; color: #002244; text-decoration: none; }}
-  .headline:hover {{ text-decoration: underline; }}
-  .summary {{ margin: 6px 0 4px; color: #333; font-size: 0.95rem; }}
-  .source {{ font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.03em; }}
-  .badge {{ display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 10px;
-            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.02em; }}
-  .badge-full {{ background: #e3f3e6; color: #1a7431; }}
-  .badge-rss {{ background: #f1f1f1; color: #888; }}
-  .empty {{ color: #666; }}
+  :root {{
+    --navy: #0a2240;
+    --navy-dark: #061530;
+    --red: #b0313f;
+    --silver: #c4c9cd;
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --text: #1c2530;
+    --text-muted: #66707c;
+  }}
+  * {{ box-sizing: border-box; }}
+  body {{
+    font-family: 'Inter', -apple-system, Segoe UI, Roboto, sans-serif;
+    max-width: 760px;
+    margin: 0 auto 60px;
+    padding: 0 20px;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }}
+  header {{
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    margin: 0 -20px 32px;
+    padding: 36px 20px 22px;
+    border-bottom: 4px solid var(--red);
+  }}
+  h1 {{
+    font-family: 'Oswald', 'Inter', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }}
+  .updated {{
+    color: var(--silver);
+    font-size: 0.82rem;
+    font-weight: 500;
+  }}
+  .group {{ margin-bottom: 30px; }}
+  .group h2 {{
+    font-family: 'Oswald', 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+    border-left: 4px solid var(--red);
+    padding: 2px 0 2px 10px;
+    margin: 0 0 14px;
+  }}
+  ul {{ list-style: none; padding: 0; margin: 0; }}
+  .item {{
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid #e8e9ec;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }}
+  .item:hover {{
+    box-shadow: 0 4px 14px rgba(10, 34, 64, 0.08);
+    transform: translateY(-1px);
+  }}
+  .headline {{
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--navy);
+    text-decoration: none;
+  }}
+  .headline:hover {{ color: var(--red); text-decoration: underline; }}
+  .summary {{
+    margin: 8px 0 10px;
+    color: var(--text);
+    font-size: 0.93rem;
+  }}
+  .meta {{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }}
+  .source {{
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+  }}
+  .badge {{
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }}
+  .badge-full {{ background: #e3f0e6; color: #2f7a3d; }}
+  .badge-rss {{ background: #eceded; color: var(--text-muted); }}
+  .empty {{ color: var(--text-muted); padding: 20px 0; }}
 </style>
 </head>
 <body>
-  <h1>Patriots Training Camp Digest</h1>
-  <div class="updated">Last updated: {now}</div>
+  <header>
+    <h1>{html.escape(PAGE_TITLE)}</h1>
+    <div class="updated">Last updated: {now}</div>
+  </header>
   {body}
 </body>
 </html>"""
