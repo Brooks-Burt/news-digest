@@ -28,8 +28,8 @@ FEEDS = [
 # not stale evergreen posts some feeds include)
 LOOKBACK_HOURS = 36
 
-MODEL = "claude-sonnet-4-6"
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+MODEL = "gpt-4o-mini"
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "docs", "index.html")
 
 
@@ -76,8 +76,8 @@ def build_digest(entries):
     if not entries:
         return {"groups": [], "note": "No new stories in the lookback window."}
 
-    if not ANTHROPIC_API_KEY:
-        print("ERROR: ANTHROPIC_API_KEY not set", file=sys.stderr)
+    if not OPENAI_API_KEY:
+        print("ERROR: OPENAI_API_KEY not set", file=sys.stderr)
         sys.exit(1)
 
     entries_text = "\n\n".join(
@@ -100,23 +100,25 @@ def build_digest(entries):
     )
 
     response = requests.post(
-        "https://api.anthropic.com/v1/messages",
+        "https://api.openai.com/v1/chat/completions",
         headers={
-            "x-api-key": ANTHROPIC_API_KEY,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
+            "Authorization": f"Bearer {OPENAI_API_KEY}",
+            "Content-Type": "application/json",
         },
         json={
             "model": MODEL,
             "max_tokens": 4000,
-            "system": system_prompt,
-            "messages": [{"role": "user", "content": entries_text}],
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": entries_text},
+            ],
         },
         timeout=60,
     )
     response.raise_for_status()
     data = response.json()
-    text = "".join(block.get("text", "") for block in data.get("content", []))
+    text = data["choices"][0]["message"]["content"]
     text = text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
 
     try:

@@ -26,7 +26,7 @@ jobs:
 
       - name: Generate digest
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python generate_digest.py
 
       - name: Commit and push updated digest

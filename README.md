@@ -18,12 +18,13 @@ Claude API, and publishes it as a simple webpage via GitHub Pages.
    git push -u origin main
    ```
 
-3. **Get an Anthropic API key** at https://console.anthropic.com/ (Settings →
-   API Keys). This is separate from your claude.ai login.
+3. **Get an OpenAI API key** at https://platform.openai.com/api-keys.
+   This is separate from a ChatGPT login — it needs its own billing set up
+   under platform.openai.com even if you already pay for ChatGPT Plus.
 
 4. **Add the key as a repo secret**:
    Repo → Settings → Secrets and variables → Actions → New repository secret
-   - Name: `ANTHROPIC_API_KEY`
+   - Name: `OPENAI_API_KEY`
    - Value: (paste your key)
 
 5. **Enable GitHub Pages**:
@@ -50,5 +51,7 @@ Claude API, and publishes it as a simple webpage via GitHub Pages.
 ## Cost
 
 - GitHub Actions + Pages: free at this scale.
-- Claude API: a daily digest run is a few thousand tokens — expect well
-  under $1-2/month with Sonnet, even less with Haiku.
+- OpenAI API: a daily digest run is a few thousand tokens — expect well
+  under $1/month with gpt-4o-mini (the default in the script). Note that
+  OpenAI billing is separate from ChatGPT Plus and requires adding a
+  payment method at platform.openai.com/settings/organization/billing.
