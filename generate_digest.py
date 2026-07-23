@@ -87,16 +87,16 @@ def fetch_recent_entries():
     entries = []
 
     for url in FEEDS:
-    try:
-        feed = feedparser.parse(url)
-        print(f"DEBUG: {url}", file=sys.stderr)
-        print(f"DEBUG:   bozo={feed.bozo}, status={feed.get('status', 'n/a')}", file=sys.stderr)
-        if feed.bozo:
-            print(f"DEBUG:   bozo_exception={feed.bozo_exception}", file=sys.stderr)
-        print(f"DEBUG:   title={feed.feed.get('title', 'NO TITLE')}, entries={len(feed.entries)}", file=sys.stderr)
-    except Exception as e:
-        print(f"WARN: failed to parse {url}: {e}", file=sys.stderr)
-        continue
+        try:
+            feed = feedparser.parse(url)
+            print(f"DEBUG: {url}", file=sys.stderr)
+            print(f"DEBUG:   bozo={feed.bozo}, status={feed.get('status', 'n/a')}", file=sys.stderr)
+            if feed.bozo:
+                print(f"DEBUG:   bozo_exception={feed.bozo_exception}", file=sys.stderr)
+            print(f"DEBUG:   title={feed.feed.get('title', 'NO TITLE')}, entries={len(feed.entries)}", file=sys.stderr)
+        except Exception as e:
+            print(f"WARN: failed to parse {url}: {e}", file=sys.stderr)
+            continue
 
         source_name = feed.feed.get("title", url)
 
