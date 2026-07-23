@@ -88,33 +88,31 @@ def fetch_recent_entries():
     for url in FEEDS:
         try:
             feed = feedparser.parse(url)
+            print(f"DEBUG: parsed {url}", file=sys.stderr)
+            print(f"DEBUG:   feed title: {feed.feed.get('title', 'NO TITLE')}", file=sys.stderr)
+            print(f"DEBUG:   entries found: {len(feed.entries)}", file=sys.stderr)
+            
         except Exception as e:
             print(f"WARN: failed to parse {url}: {e}", file=sys.stderr)
             continue
 
         source_name = feed.feed.get("title", url)
 
-        for entry in feed.entries:
+        for i, entry in enumerate(feed.entries):
             published = entry.get("published_parsed") or entry.get("updated_parsed")
             if published:
                 pub_dt = datetime(*published[:6], tzinfo=timezone.utc)
+                print(f"DEBUG:   entry {i}: published {pub_dt.isoformat()}, cutoff {cutoff.isoformat()}", file=sys.stderr)
                 if pub_dt < cutoff:
+                    print(f"DEBUG:     -> FILTERED OUT (too old)", file=sys.stderr)
                     continue
             else:
+                print(f"DEBUG:   entry {i}: NO PUBLISH DATE", file=sys.stderr)
                 pub_dt = None
 
+            print(f"DEBUG:     -> KEEPING", file=sys.stderr)
             article_text = extract_article(entry.get("link", ""))
-            article_text = article_text[:6000]
-            entries.append({
-                "source": source_name,
-                "title": entry.get("title", "").strip(),
-                "link": entry.get("link", ""),
-                "summary": (entry.get("summary", "") or "")[:400],
-                "article": article_text,
-                "published": pub_dt.isoformat() if pub_dt else None,
-            })
-            #test 
-            print(article_text[:400])
+            # ... rest of entry append
    
     return entries
 
