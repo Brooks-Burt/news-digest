@@ -24,7 +24,8 @@ import requests
 # What this digest is about, used in the page title and the prompt sent
 # to the model so it knows what's relevant vs. noise.
 DIGEST_TOPIC = "New England Patriots training camp"
-PAGE_TITLE = "Pats Training Camp Digest"
+PAGE_TITLE = "Patriots Camp Digest"
+OVERREACTION_TITLE = "Panic Meter"
 
 # RSS feed URLs — swap these out for any topic
 FEEDS = [
@@ -34,7 +35,7 @@ FEEDS = [
     "https://www.nytimes.com/athletic/rss/nfl/patriots/",
     "https://www.thecoldwire.com/sports/nfl/new-england-patriots/feed/",
     "https://www.patspropaganda.com/feed/",
-  #  "https://feeds.bleacherreport.com/articles"
+    "https://feeds.bleacherreport.com/articles"
 ]
 
 # How the model should group stories. Adjust per topic.
@@ -47,13 +48,25 @@ CATEGORIES = [
     "Other News",
 ]
 
+# Categories for the overreaction page — same underlying stories, dumber framing
+OVERREACTION_CATEGORIES = [
+    "Panic Alerts",
+    "Injury Death Watch",
+    "Front Office Conspiracy",
+    "Legacy on the Line",
+    "Scheme Meltdowns",
+    "Everything Else Is Fine (Probably)",
+]
+
 # Only include stories published within this many hours (catches "daily" news,
 # not stale evergreen posts some feeds include)
-LOOKBACK_HOURS = 48
+LOOKBACK_HOURS = 168
 
 MODEL = "gpt-4o-mini"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "docs", "index.html")
+DOCS_DIR = os.path.join(os.path.dirname(__file__), "docs")
+OUTPUT_PATH = os.path.join(DOCS_DIR, "index.html")
+OVERREACTION_OUTPUT_PATH = os.path.join(DOCS_DIR, "overreactions.html")
 
 # ----------------------------------------------------------------------
 # 1.5. GET ARTICLE TEXT (PENDING OPTION)
@@ -62,7 +75,6 @@ OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "docs", "index.html")
 def extract_article(url):
     try:
         downloaded = trafilatura.fetch_url(url)
-      #  print(f"Downloaded {url}: {len(downloaded) if downloaded else 0} bytes")
         if not downloaded:
             print(f"WARN: failed to download {url}", file=sys.stderr)
             return ""
@@ -133,16 +145,9 @@ def fetch_recent_entries():
 
 
 # ----------------------------------------------------------------------
-# 3. SUMMARIZE / GROUP via Claude API
+# 3. SUMMARIZE / GROUP via LLM API
 # ----------------------------------------------------------------------
-def build_digest(entries):
-    if not entries:
-        return {"groups": [], "note": "No new stories in the lookback window."}
-
-    if not OPENAI_API_KEY:
-        print("ERROR: OPENAI_API_KEY not set", file=sys.stderr)
-        sys.exit(1)
-
+def _call_model(entries, system_prompt):
     entries_text = "\n\n".join(
     f"""[{i}]
 SOURCE: {e['source']}
@@ -157,40 +162,6 @@ ARTICLE:
 """
     for i, e in enumerate(entries)
 )
-
-    system_prompt = (
-        f"You are organizing news about {DIGEST_TOPIC} into a daily digest. "
-        "You will receive both an RSS snippet and, when available, the extracted article text. "
-        "Always prefer information from the ARTICLE section because it contains more complete details. "
-        "If ARTICLE is unavailable or marked '[ARTICLE NOT AVAILABLE]', summarize using only the RSS snippet. "
-        "Never invent facts that are not present in either source. "
-        f"Group them into these categories: {', '.join(CATEGORIES)}. "
-        "Merge near-duplicate stories covering the same event (keep only one, but you may note "
-        "if multiple outlets covered it). Skip anything not actually relevant to the topic. "
-        "You are a senior NFL editor producing a Patriots morning briefing. "
-        "Write with the voice of an experienced beat writer: confident, a little wry, using natural "
-        "football vernacular (e.g. 'held down the edge,' 'climbed the depth chart,' 'made his case') "
-        "rather than stiff or corporate phrasing. You may add one brief aside or bit of color per item "
-        "(a short clause or parenthetical) reacting to the news the way a knowledgeable writer would "
-        "but keep it grounded in what the source actually reported, not speculation about outcomes it "
-        "didn't state. "
-        "Your audience has NOT read these articles. For every article: "
-        "State immediately who the story is about."
-        "Rewrite clickbait into factual language."
-        "Mention every important player or coach by name."
-        "Never write 'a player', 'one veteran', 'a forgotten weapon', or similar vague phrases."
-        "Explain why the story matters."
-        "Write 1 concise paragraphs. Assume your briefing must stand on its own. "
-        "If the article contains speculation, clearly label it as speculation."
-        "Never invent facts."
-        "For each item, also include a field \"source_detail\" set to exactly \"full_article\" "
-        "if you used the ARTICLE section, or \"rss_summary\" if ARTICLE was unavailable and you "
-        "used only the snippet. "
-        "Respond ONLY with valid JSON, no markdown fences, matching this schema:\n"
-        '{"groups": [{"category": "string", "items": [{"headline": "string", '
-        '"summary": "string", "source": "string", "link": "string", '
-        '"source_detail": "full_article | rss_summary"}]}]}'
-    )
 
     response = requests.post(
         "https://api.openai.com/v1/chat/completions",
@@ -221,10 +192,95 @@ ARTICLE:
         sys.exit(1)
 
 
+def build_digest(entries):
+    """The factual, beat-writer-toned digest."""
+    if not entries:
+        return {"groups": [], "note": "No new stories in the lookback window."}
+
+    if not OPENAI_API_KEY:
+        print("ERROR: OPENAI_API_KEY not set", file=sys.stderr)
+        sys.exit(1)
+
+    system_prompt = (
+        f"You are a beat writer who has covered {DIGEST_TOPIC} for years, writing a daily digest. "
+        "You will receive both an RSS snippet and, when available, the extracted article text. "
+        "Always prefer information from the ARTICLE section because it contains more complete details. "
+        "If ARTICLE is unavailable or marked '[ARTICLE NOT AVAILABLE]', summarize using only the RSS snippet. "
+        "Never invent facts, quotes, or details that are not present in either source — personality "
+        "belongs in your word choice and tone, never in the substance of what happened. "
+        "Write with the voice of an experienced beat writer: confident, a little wry, using natural "
+        "football vernacular (e.g. 'held down the edge,' 'climbed the depth chart,' 'made his case') "
+        "rather than stiff or corporate phrasing. You may add one brief aside or bit of color per item "
+        "(a short clause or parenthetical) reacting to the news the way a knowledgeable writer would — "
+        "but keep it grounded in what the source actually reported, not speculation about outcomes it "
+        "didn't state. Vary how each item opens; do not start every summary the same way. Keep the "
+        "core facts, who/what, front and center — flavor is seasoning, not the whole dish. "
+        f"Group items into these categories: {', '.join(CATEGORIES)}. "
+        "Merge near-duplicate stories covering the same event (keep only one, but you may note "
+        "if multiple outlets covered it). Skip anything not actually relevant to the topic. "
+        "Write each summary in 2-3 sentences IN YOUR OWN WORDS (never copy wording from the "
+        "snippet or article) and keep the original link and source name. "
+        "Ensure capture of main point/player article may be hinting at (ie if title is "
+        "this linebacker could prove to be a problem, please include players name)."
+        "For each item, also include a field \"source_detail\" set to exactly \"full_article\" "
+        "if you used the ARTICLE section, or \"rss_summary\" if ARTICLE was unavailable and you "
+        "used only the snippet. "
+        "Respond ONLY with valid JSON, no markdown fences, matching this schema:\n"
+        '{"groups": [{"category": "string", "items": [{"headline": "string", '
+        '"summary": "string", "source": "string", "link": "string", '
+        '"source_detail": "full_article | rss_summary"}]}]}'
+    )
+
+    return _call_model(entries, system_prompt)
+
+
+def build_overreaction_digest(entries):
+    """Same stories, dialed up to absurd overreaction — but still fact-anchored."""
+    if not entries:
+        return {"groups": [], "note": "No new stories in the lookback window."}
+
+    if not OPENAI_API_KEY:
+        print("ERROR: OPENAI_API_KEY not set", file=sys.stderr)
+        sys.exit(1)
+
+    system_prompt = (
+        f"You write an unhinged, satirical overreaction column about {DIGEST_TOPIC}, in the "
+        "style of a sports-talk-radio caller who has had way too much coffee. Every story, no "
+        "matter how minor, gets treated as a five-alarm crisis or a franchise-altering triumph — "
+        "a backup lineman getting a rep in 11-on-11s should sound like the second coming, a "
+        "veteran resting for a day should sound like the roster is collapsing. Lean into hyperbole, "
+        "dramatic declarations, and mock-serious stakes ('this changes everything,' 'sound the "
+        "alarms,' 'we need to talk'). "
+        "CRITICAL GUARDRAIL: the exaggeration is only ever in tone, framing, and stakes — never in "
+        "the underlying facts. Every who/what/when must remain accurate to the source. Never invent "
+        "injuries, transactions, quotes, or outcomes that didn't happen; you are allowed to be absurd "
+        "about how much a real, small event matters, not to make up a bigger event. If that line ever "
+        "feels blurry, stay closer to the facts and let the tone carry the joke instead. "
+        "You will receive both an RSS snippet and, when available, the extracted article text; prefer "
+        "the ARTICLE section when present, and fall back to the SNIPPET when it says "
+        "'[ARTICLE NOT AVAILABLE]'. "
+        f"Group items into these categories: {', '.join(OVERREACTION_CATEGORIES)}. "
+        "Merge near-duplicate stories covering the same event into one, exaggerated item. Skip "
+        "anything not actually relevant to the topic. "
+        "Write each summary in 2-3 sentences IN YOUR OWN WORDS (never copy wording from the "
+        "snippet or article) and keep the original link and source name. "
+        "For each item, also include a field \"source_detail\" set to exactly \"full_article\" "
+        "if you used the ARTICLE section, or \"rss_summary\" if ARTICLE was unavailable and you "
+        "used only the snippet. "
+        "Respond ONLY with valid JSON, no markdown fences, matching this schema:\n"
+        '{"groups": [{"category": "string", "items": [{"headline": "string", '
+        '"summary": "string", "source": "string", "link": "string", '
+        '"source_detail": "full_article | rss_summary"}]}]}'
+    )
+
+    return _call_model(entries, system_prompt)
+
+
 # ----------------------------------------------------------------------
 # 4. RENDER HTML
 # ----------------------------------------------------------------------
-def render_html(digest):
+def render_html(digest, page_title=None, active_tab="digest"):
+    page_title = page_title or PAGE_TITLE
     now = datetime.now(timezone.utc).strftime("%B %d, %Y %H:%M UTC")
     groups = digest.get("groups", [])
 
@@ -256,7 +312,7 @@ def render_html(digest):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{html.escape(PAGE_TITLE)}</title>
+<title>{html.escape(page_title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
@@ -358,12 +414,42 @@ def render_html(digest):
   .badge-full {{ background: #e3f0e6; color: #2f7a3d; }}
   .badge-rss {{ background: #eceded; color: var(--text-muted); }}
   .empty {{ color: var(--text-muted); padding: 20px 0; }}
+  nav {{
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+  }}
+  nav a {{
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--silver);
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid transparent;
+  }}
+  nav a.active {{
+    color: #ffffff;
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+    border-bottom-color: transparent;
+  }}
+  nav a:not(.active):hover {{
+    color: #ffffff;
+  }}
 </style>
 </head>
 <body>
   <header>
-    <h1>{html.escape(PAGE_TITLE)}</h1>
+    <h1>{html.escape(page_title)}</h1>
     <div class="updated">Last updated: {now}</div>
+    <nav>
+      <a href="index.html" class="{'active' if active_tab == 'digest' else ''}">Digest</a>
+      <a href="overreactions.html" class="{'active' if active_tab == 'overreactions' else ''}">{html.escape(OVERREACTION_TITLE)}</a>
+    </nav>
   </header>
   {body}
 </body>
@@ -376,14 +462,22 @@ def render_html(digest):
 def main():
     entries = fetch_recent_entries()
     print(f"Fetched {len(entries)} recent entries", file=sys.stderr)
-    digest = build_digest(entries)
-    output = render_html(digest)
 
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    os.makedirs(DOCS_DIR, exist_ok=True)
+
+    digest = build_digest(entries)
+    output = render_html(digest, page_title=PAGE_TITLE, active_tab="digest")
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         f.write(output)
-
     print(f"Wrote digest to {OUTPUT_PATH}", file=sys.stderr)
+
+    overreaction_digest = build_overreaction_digest(entries)
+    overreaction_output = render_html(
+        overreaction_digest, page_title=OVERREACTION_TITLE, active_tab="overreactions"
+    )
+    with open(OVERREACTION_OUTPUT_PATH, "w", encoding="utf-8") as f:
+        f.write(overreaction_output)
+    print(f"Wrote overreaction page to {OVERREACTION_OUTPUT_PATH}", file=sys.stderr)
 
 
 if __name__ == "__main__":
