@@ -34,8 +34,7 @@ FEEDS = [
     "https://www.boston.com/tag/new-england-patriots/feed/",
     "https://www.nytimes.com/athletic/rss/nfl/patriots/",
     "https://www.thecoldwire.com/sports/nfl/new-england-patriots/feed/",
-    "https://www.patspropaganda.com/feed/",
-    "https://feeds.bleacherreport.com/articles"
+    "https://www.patspropaganda.com/feed/"
 ]
 
 # How the model should group stories. Adjust per topic.
