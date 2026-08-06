@@ -173,7 +173,7 @@ ARTICLE:
         "rather than stiff or corporate phrasing. You may add one brief aside or bit of color per item "
         "(a short clause or parenthetical) reacting to the news the way a knowledgeable writer would "
         "but keep it grounded in what the source actually reported, not speculation about outcomes it "
-        "didn't state.
+        "didn't state. "
         "Your audience has NOT read these articles. For every article: "
         "State immediately who the story is about."
         "Rewrite clickbait into factual language."
