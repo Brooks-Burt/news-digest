@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panic Meter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a2240;
+    --navy-dark: #061530;
+    --red: #b0313f;
+    --silver: #c4c9cd;
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --text: #1c2530;
+    --text-muted: #66707c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, Segoe UI, Roboto, sans-serif;
+    max-width: 760px;
+    margin: 0 auto 60px;
+    padding: 0 20px;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    margin: 0 -20px 32px;
+    padding: 36px 20px 22px;
+    border-bottom: 4px solid var(--red);
+  }
+  h1 {
+    font-family: 'Oswald', 'Inter', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin: 0 0 6px;
+  }
+  .updated {
+    color: var(--silver);
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+  .group { margin-bottom: 30px; }
+  .group h2 {
+    font-family: 'Oswald', 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+    border-left: 4px solid var(--red);
+    padding: 2px 0 2px 10px;
+    margin: 0 0 14px;
+  }
+  ul { list-style: none; padding: 0; margin: 0; }
+  .item {
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid #e8e9ec;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  .item:hover {
+    box-shadow: 0 4px 14px rgba(10, 34, 64, 0.08);
+    transform: translateY(-1px);
+  }
+  .headline {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--navy);
+    text-decoration: none;
+  }
+  .headline:hover { color: var(--red); text-decoration: underline; }
+  .summary {
+    margin: 8px 0 10px;
+    color: var(--text);
+    font-size: 0.93rem;
+  }
+  .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .source {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .badge-full { background: #e3f0e6; color: #2f7a3d; }
+  .badge-rss { background: #eceded; color: var(--text-muted); }
+  .empty { color: var(--text-muted); padding: 20px 0; }
+  nav {
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+  }
+  nav a {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--silver);
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid transparent;
+  }
+  nav a.active {
+    color: #ffffff;
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+    border-bottom-color: transparent;
+  }
+  nav a:not(.active):hover {
+    color: #ffffff;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Panic Meter</h1>
+    <div class="updated">Last updated: August 06, 2026 22:48 UTC</div>
+    <nav>
+      <a href="index.html" class="">Digest</a>
+      <a href="overreactions.html" class="active">Panic Meter</a>
+    </nav>
+  </header>
+  
+                <section class="group">
+                    <h2>Panic Alerts</h2>
+                    <ul><li class="item">
+                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/08/05/stefon-diggs-reportedly-set-to-sign-with-commanders-on-one-year-deal/" target="_blank" rel="noopener">Stefon Diggs Signs with Commanders: Patriots Fans in Crisis!</a>
+                    <p class="summary">The Patriots&#x27; decision to part ways with Stefon Diggs is now biting back, as the star receiver has signed a $12 million deal with the Commanders, causing widespread anxiety among fans! How can the Patriots recover from this setback, especially when their receiver depth is already complicated with A.J. Brown and Romeo Doubs? Sound the alarms!</p>
+                    <div class="meta">
+                        <span class="source">New England Patriots: News, commentary, scores, and stats</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
+                </li></ul>
+                </section>
+
+                <section class="group">
+                    <h2>Injury Death Watch</h2>
+                    <ul><li class="item">
+                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/08/05/new-england-patriots-will-campbell-nfl-football/" target="_blank" rel="noopener">Will Campbell&#x27;s Arm Brace: The End of His Career?</a>
+                    <p class="summary">With starting left tackle Will Campbell limited in practice because of an alarming arm brace, fans are worried about the future of the offensive line! After a shaky postseason, is this the final straw for Campbell&#x27;s NFL career? We need answers!</p>
+                    <div class="meta">
+                        <span class="source">New England Patriots: News, commentary, scores, and stats</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
+                </li>
+<li class="item">
+                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/08/04/weve-got-to-make-up-for-lost-time-after-lengthy-absence-gabe-jacas-faces-a-new-challenge/" target="_blank" rel="noopener">Gabe Jacas: Can He Overcome Injury Woes?</a>
+                    <p class="summary">After starting training camp late due to knee surgery and ongoing concerns about his participation, rookie Gabe Jacas finally joins the team— but can he make up for lost time? Fans are holding their breath as Jacas aims to become a key player in the defensive lineup!</p>
+                    <div class="meta">
+                        <span class="source">New England Patriots: News, commentary, scores, and stats</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
+                </li></ul>
+                </section>
+
+                <section class="group">
+                    <h2>Front Office Conspiracy</h2>
+                    <ul><li class="item">
+                    <a class="headline" href="https://www.patspulpit.com/mike-vrabel-s-romeo-doubs-gamble-will-be-put-to-the-test-after-stefon-diggs-signing-01kz9hyqefya?utm_source=RSS" target="_blank" rel="noopener">Patriots Taking a Gamble with Romeo Doubs Over Stefon Diggs?</a>
+                    <p class="summary">The Patriots&#x27; puzzling decision to favor Romeo Doubs over re-signing Stefon Diggs is sending shockwaves through New England! How could this decision potentially haunt them if Doubs doesn’t rise to the occasion? The conspiracy theories are flying!</p>
+                    <div class="meta">
+                        <span class="source">Pats Pulpit</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
+                </li></ul>
+                </section>
+
+                <section class="group">
+                    <h2>Legacy on the Line</h2>
+                    <ul><li class="item">
+                    <a class="headline" href="https://musketfire.com/drake-maye-disrespect-reaches-new-high-with-delusional-mvp-prediction-01kz7359cywk?utm_source=RSS" target="_blank" rel="noopener">Is Drake Maye&#x27;s MVP Hopes in Jeopardy?</a>
+                    <p class="summary">After CBS Sports pundit John Breech declared Drake Maye won&#x27;t receive a single MVP vote in 2026, the quarterback&#x27;s reputation is on the line! Are we watching a ripe-for-disaster season unfold right before our eyes?</p>
+                    <div class="meta">
+                        <span class="source">Musket Fire Feed</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
+                </li></ul>
+                </section>
+
+                <section class="group">
+                    <h2>Scheme Meltdowns</h2>
+                    <ul><li class="item">
+                    <a class="headline" href="https://www.boston.com/sports/new-england-patriots/2026/08/06/drake-maye-training-camp-struggles-patriots-comments/" target="_blank" rel="noopener">Patriots Defense Makes a Disturbing Turn: 3 STRAIGHT INTERCEPTIONS!</a>
+                    <p class="summary">In a shocking display during the two-minute drill, the Patriots defense shocked fans by intercepting three passes in a row! Is the offense unraveling as we edge closer to the season? Panic is setting in!</p>
+                    <div class="meta">
+                        <span class="source">New England Patriots: News, commentary, scores, and stats</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
+                </li></ul>
+                </section>
+
+                <section class="group">
+                    <h2>Everything Else Is Fine (Probably)</h2>
+                    <ul><li class="item">
+                    <a class="headline" href="https://www.patspulpit.com/new-england-patriots-news/132658/patriots-host-greg-van-roten-free-agency-visit-training-camp" target="_blank" rel="noopener">Greg Van Roten Could Be The Missing Piece for New England!</a>
+                    <p class="summary">The Patriots are hosting veteran guard Greg Van Roten, potentially enhancing their offensive line! Fans are cautiously optimistic this could strengthen the team&#x27;s depth. Is this the offseason signing we’ve all been waiting for?</p>
+                    <div class="meta">
+                        <span class="source">Pats Pulpit</span>
+                        <span class="badge badge-full">Full article</span>
+                    </div>
+                </li></ul>
+                </section>
+</body>
+</html>
